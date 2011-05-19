@@ -78,6 +78,9 @@
               margin: 0.2em 0
               font-weight: bold
 
+              a
+                text-decoration: none
+
         #footer
           margin-top: 2em
           margin-bottom: 2em
@@ -108,14 +111,20 @@
       - finished_stories.each do |story|
         .story[story]
           .feature
-            .title= story.name
+            .title
+              %a{:href => story.url, :target => '_blank'}= story.id
+              = '-'
+              = story.name
             .description= story.description
     %h2 Known bugs
     #known_bugs
       - known_bugs.each do |story|
         .story[story]
           .bug
-            .title= story.name
+            .title
+              %a{:href => story.url, :target => '_blank'}= story.id
+              = '-'
+              = story.name
     - if release_notes?
       %h2 Release notes
       #release_notes
