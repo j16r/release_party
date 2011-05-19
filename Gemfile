@@ -3,6 +3,7 @@ source :gemcutter
 gem 'capistrano'
 gem 'pivotal-tracker'
 gem 'mail'
+gem 'grit'
 
 group 'development' do
   gem 'rspec', '>= 2.5.0'
