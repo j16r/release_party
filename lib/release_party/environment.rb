@@ -50,6 +50,8 @@ class Environment
     self.finished_stories = []
     self.known_bugs = []
     self.send_email = true
+    self.template_engine = :haml
+    self.deliver_stories = false
   end
 
 end
