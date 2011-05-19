@@ -16,7 +16,7 @@ class ReleaseFile
   end
 
   def method_missing(method_id, *args, &block)
-    @attributes[method_id.to_sym] = *args
+    @attributes[method_id.to_sym] = args.first || block
   end
 
 end
