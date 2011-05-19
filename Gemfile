@@ -3,8 +3,6 @@ source :gemcutter
 gem 'capistrano'
 gem 'pivotal-tracker'
 gem 'mail'
-gem 'haml'
-gem 'sass'
 
 group 'development' do
   gem 'rspec', '>= 2.5.0'
@@ -13,4 +11,6 @@ group 'development' do
   gem 'rcov', '>= 0'
   gem 'capistrano-spec'
   gem 'yard'
+  gem 'haml'
+  gem 'sass'
 end
