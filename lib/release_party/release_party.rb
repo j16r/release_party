@@ -20,12 +20,15 @@ module Capistrano::ReleaseParty
 
           @env.load_capistrano_defaults(self)
           @env.load_release_file
+
+          announce "beginning deployment, project details obtained."
         end
 
         task 'finished' do
           raise ArgumentError, "Release finished without being started" if @env.nil?
 
           begin
+            announce "celebrating release, deployment finished successfully!"
 
             # Record when the release finished
             @env.release_finished = Time.now
@@ -115,6 +118,7 @@ module Capistrano::ReleaseParty
         :port => env.smtp_port,
         :domain => env.smtp_domain
     end
+    announce "delivering deployment notice to #{env.email_notification_to.inspect}"
     Mail.deliver do
       from      env.from_address
       to        env.email_notification_to
@@ -124,6 +128,11 @@ module Capistrano::ReleaseParty
         body body
       end
     end
+    announce "deployment notice sent!"
+  end
+
+  def announce(message)
+    puts "ReleaseParty: #{message}"
   end
 
   def arguments_required(env, *arguments)
