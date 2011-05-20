@@ -1,0 +1,23 @@
+#
+# This is a sample Releasefile used to test Release Party with rspec
+#
+
+# Pivotal details
+# To make sure the api key does not get stored in a repo we just load it from a
+# hidden file inside a block
+project_api_key         { File.read("#{ENV['HOME']}/.pivotal_api_key") }
+project_id              295755
+
+# Who to notify about the release
+email_notification_to   'jebarker+releaseparty@gmail.com'
+
+# Email template
+template                'spec/assets/template.html.haml'
+
+# Mailcatcher
+smtp_port               1025
+
+# Release notes
+release_notes <<eof
+This release of Release Party is unbelievably freakin' alpha, don't use it!
+eof
