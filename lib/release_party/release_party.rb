@@ -106,13 +106,14 @@ module Capistrano::ReleaseParty
 
   def deliver_notification(env, body)
     arguments_required env,
-      :smtp_address, :smtp_port, :from_address,
+      :smtp_address, :smtp_port, :smtp_domain, :from_address,
       :email_notification_to, :subject
 
     Mail.defaults do
       delivery_method :smtp,
         :address => env.smtp_address,
-        :port => env.smtp_port
+        :port => env.smtp_port,
+        :domain => env.smtp_domain
     end
     Mail.deliver do
       from      env.from_address
