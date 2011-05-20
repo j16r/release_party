@@ -33,16 +33,18 @@ class Environment
   end
 
   def load_capistrano_defaults(cap_config)
-    # General cap info
-    self.user = cap_config.fetch(:user, `git config user.name`.chomp)
-    self.branch = cap_config.fetch(:branch, 'master')
-    self.stage = cap_config.fetch(:stage, 'staging')
-    self.repository = cap_config.fetch(:repository, nil)
-    self.domain = cap_config.fetch(:domain, nil)
-    self.display_name = cap_config.fetch(:display_name, 'Release Party')
+    cap_config.variables.keys.each do |key|
+      puts "Cap config key: #{key}"
+      self.send("#{key}=", cap_config.fetch(key, @attributes[key.to_sym]))
+    end
   end
 
   def load_defaults
+    self.user = `git config user.name`.chomp
+    self.branch = 'master'
+    self.stage = 'staging'
+    self.domain = 'http://releaseparty.org'
+    self.display_name = 'Release Party'
     self.from_address = 'Release Party <releaseparty@noreply.org>'
     self.smtp_address = 'localhost'
     self.smtp_port = 25
