@@ -3,6 +3,7 @@ Gem::Specification.new do |s|
   s.version                   = '0.0.1'
   s.authors                   = ['John Barker']
   s.date                      = '2011-05-18'
+  s.homepage                  = 'https://github.com/excepttheweasel/release_party'
   s.required_rubygems_version = Gem::Requirement.new("> 1.3.1") if s.respond_to? :required_rubygems_version=
   s.description               = 'Perform a number of common post deployment tasks such as delivering pivotal stories, sending out a release email, notifying campfire.'
   s.summary                   = 'Celebrate releases'
