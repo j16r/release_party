@@ -10,8 +10,8 @@ Gem::Specification.new do |s|
   s.extra_rdoc_files          = []
   s.files                     = Dir["lib/**/*.rb"]
 
-  s.add_runtime_dependency("capistrano", ["~> 2.6.0"])
-  s.add_runtime_dependency("pivotal-tracker", ["~> 0.3.1"])
-  s.add_runtime_dependency("grit", ["~> 2.4.1"])
-  s.add_runtime_dependency("mail", ["~> 2.3.0)"])
+  s.add_runtime_dependency("capistrano", [">= 2.6.0"])
+  s.add_runtime_dependency("pivotal-tracker", [">= 0.3.1"])
+  s.add_runtime_dependency("grit", [">= 2.4.1"])
+  s.add_runtime_dependency("mail", [">= 2.3.0)"])
 end
