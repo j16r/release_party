@@ -1,2 +1,3 @@
 .bundle
-*.swp
+*.sw?
+Gemfile.lock
