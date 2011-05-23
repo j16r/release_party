@@ -2,24 +2,26 @@ require File.join(File.dirname(__FILE__), 'release_file')
 
 class Environment
 
-  def initialize
-    @attributes = {}
-    load_defaults
+  attr :party
+
+  def initialize(party)
+    @party = party
+    @variables = {}
   end
 
   def method_missing(method_id, *args, &block)
     case method_id.to_s
     when /\A(.*)=\Z/
-      @attributes[$1.to_sym] = args.first
+      @variables[$1.to_sym] = args.first || block
 
     when /\A(.*)\?\Z/
-      @attributes.key?($1.to_sym)
+      @variables.key?($1.to_sym)
 
     else
-      unless @attributes.key?(method_id)
+      unless @variables.key?(method_id)
         raise ArgumentError, "No value for #{method_id} defined"
       end
-      value = @attributes[method_id.to_sym]
+      value = @variables[method_id.to_sym]
       return value.call if value.is_a?(Proc)
       value
 
@@ -27,15 +29,15 @@ class Environment
   end
 
   def load_release_file
-    # Process the Releasefile and merge the attributes loaded
+    # Process the Releasefile and merge the variables loaded
     release_file = ReleaseFile.new
-    @attributes = @attributes.merge release_file.attributes
+    @variables = @variables.merge release_file.variables
   end
 
   def load_capistrano_defaults(cap_config)
     cap_config.variables.keys.each do |key|
       puts "Cap config key: #{key}"
-      self.send("#{key}=", cap_config.fetch(key, @attributes[key.to_sym]))
+      self.send("#{key}=", cap_config.fetch(key, @variables[key.to_sym]))
     end
   end
 

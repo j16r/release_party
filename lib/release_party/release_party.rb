@@ -1,198 +1,78 @@
+require 'rubygems'
 require 'capistrano'
-require 'pivotal-tracker'
-require 'mail'
-require 'grit'
 
+require File.join(File.dirname(__FILE__), 'announce')
 require File.join(File.dirname(__FILE__), 'environment')
+require File.join(File.dirname(__FILE__), 'celebration')
+
+Dir[File.join(File.dirname(__FILE__), 'celebrations', '*.rb')].each do |file|
+  require file
+end
 
 module Capistrano::ReleaseParty
+  include Announce
 
   def self.extended(configuration)
     configuration.load do
 
+      before 'deploy', 'release_party:started'
       after 'deploy', 'release_party:finished'
 
       namespace 'release_party' do
         task 'started' do
-          @env = Environment.new
+
+          if @env.nil?
+            # Load all the variables, first the defaults, then the values from
+            # the Capfile , then anything in the Releasefile
+            @env = Environment.new(Capistrano::ReleaseParty)
+            @env.load_defaults
+            @env.load_capistrano_defaults(configuration)
+            begin
+              @env.load_release_file
+            rescue ReleaseFile::FileNotFoundError => e
+              announce e.message
+            end
+          end
+
+          announce "beginning deployment, project details obtained."
 
           # Record when the release began
           @env.release_started = Time.now
 
-          @env.load_capistrano_defaults(self)
-          @env.load_release_file
+          # Load all the celebrations
+          @env.celebrations = \
+            Celebration.celebrations.collect do |celebration_class|
+              begin
+                celebration_class.new(@env).tap(&:before_deploy)
 
-          announce "beginning deployment, project details obtained."
+              rescue LoadError => error
+                announce "Unable to load #{celebration} you need the #{error} gem"
 
-          load_git_progress @env
-          load_tracker_progress @env
+              rescue ArgumentError => error
+                announce error.message
+
+              end
+            end.compact
+
+          self
+          
         end
 
         task 'finished' do
           raise ArgumentError, "Release finished without being started" if @env.nil?
 
-          begin
-            announce "celebrating release, deployment finished successfully!"
+          announce "performing post deploy celebrations"
 
-            # Record when the release finished
-            @env.release_finished = Time.now
+          # Record when the release finished
+          @env.release_finished = Time.now
 
+          # Do after deploy
+          @env.celebrations.each(&:after_deploy)
 
-            # Do pivotal story delivery
-            if @env.deliver_stories
-              commit_tracker_progress @env
-            end
-
-            # Send an email notification
-            if @env.send_email
-              body = load_email_content @env
-              deliver_notification(@env, body)
-            end
-
-          #rescue ArgumentError => error
-          #  puts "ERROR: #{error.message}"
-          end
+          self
         end
       end
     end
-  end
-
-  def commit_tracker_progress(env)
-    # Go through each finished story id we've seen in the git repo
-    # and deliver each story that is marked as finished
-    env.finished_store_ids.each do |story_id|
-
-    end
-  end
-
-  def load_git_progress(env)
-    #repo = Grit::Repo.new(Dir.pwd)
-    repo = Grit::Repo.new("/Users/john/Projects/breeze")
-    config = Grit::Config.new(repo)
-
-    feature_branch = config.fetch('gitflow.prefix.feature', 'feature/')
-    release_branch = config.fetch('gitflow.prefix.release', 'release/')
-    puts "Feature branch: #{feature_branch}"
-    puts "Release branch: #{release_branch}"
-
-    # Find the last release
-    latest_release = \
-      repo.commits('master').find do |commit|
-        commit.message =~ /\AMerge branch '#{release_branch}(\d+)/
-      end
-    latest_release_tag = $1
-
-    puts "Commit: #{latest_release} #{latest_release.message}"
-    previous_release = \
-      repo.commits('master', 100).find do |commit|
-        if commit.message =~ /\AMerge branch '#{release_branch}(\d+)/ 
-          latest_release_tag != $1
-        end
-      end
-    previous_release_tag = $1
-    puts "Commit: #{previous_release} #{previous_release.message}"
-
-    env.finished_story_ids = 
-      repo.commits('develop').collect do |commit|
-        $1 if commit.message =~ /\AMerge branch '#{feature_branch}(\d+)/
-      end.compact
-    puts env.finished_story_ids
-  end
-
-  def load_email_content(env)
-    arguments_required env, :template_engine, :template
-
-    template = env.template
-    raise ArgumentError, "Missing template file #{template}" unless File.exists?(template)
-
-    engine = \
-      case env.template_engine
-      when :haml
-        load_haml
-        Haml::Engine.new(File.read(template))
-
-      when :erb
-        load_erb
-        ERB.new(File.read(template))
-
-      else
-        raise ArgumentError, "Unsupported template engine #{env.template_engine}"
-      end
-
-    engine.render env
-  end
-
-  def load_tracker_progress(env)
-    arguments_required env, :project_id, :project_api_key
-
-    PivotalTracker::Client.token = env.project_api_key
-
-    begin
-      env.project = PivotalTracker::Project.find(env.project_id)
-    rescue RestClient::Request::Unauthorized => e
-      puts 'Unable to authenticate with pivotal, perhaps your API key is wrong.' +
-        "Message: #{e.message}"
-    end
-
-    env.instance_eval do
-      self.finished_stories = \
-        project.stories.all(:state => 'finished')
-      self.known_bugs = \
-        project.stories.all(:state => ['unstarted', 'started'], :story_type => 'bug')
-    end
-  end
-
-  def deliver_notification(env, body)
-    arguments_required env,
-      :smtp_address, :smtp_port, :from_address,
-      :email_notification_to, :subject
-
-    Mail.defaults do
-      delivery_method :smtp,
-        :address => env.smtp_address,
-        :port => env.smtp_port,
-        :domain => env.smtpy_domain? && env.smtp_domain
-    end
-    announce "delivering deployment notice to #{env.email_notification_to.inspect}"
-    Mail.deliver do
-      from      env.from_address
-      to        env.email_notification_to
-      subject   env.subject
-      html_part do
-        content_type 'text/html; charset=UTF-8'
-        body body
-      end
-    end
-    announce "deployment notice sent!"
-  end
-
-  def announce(message)
-    puts "ReleaseParty: #{message}"
-  end
-
-  def arguments_required(env, *arguments)
-    missing = arguments.reject do |argument|
-      env.send("#{argument}?".to_sym)
-    end
-    unless missing.empty?
-      raise ArgumentError, "Parameters #{missing.join(', ')} must be defined"
-    end
-  end
-
-  def load_haml
-    require 'haml'
-  rescue LoadError => error
-    raise ArgumentError,
-      'Unable to load HAML, you need to make sure the haml gem is installed ' 
-      'if it is specified as the template engine'
-  end
-
-  def load_erb
-    require 'erb'
-  rescue LoadError => error
-    raise ArgumentError,
-      'Unable to load ERB, you need to make sure the erb gem is installed ' 
-      'if it is specified as the template engine'
   end
 
 end
