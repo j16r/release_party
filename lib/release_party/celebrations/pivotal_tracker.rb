@@ -36,6 +36,12 @@ module Celebrations
     end
 
     def after_deploy
+      # Deliver all finished stories if the deliver_finished flag is set
+      if environment.deliver_finished? && environment.deliver_finished
+        finished_stories.each do |story|
+          story.update(:current_state => 'delivered')
+        end
+      end
     end
 
   private #######################################################################

@@ -13,6 +13,9 @@
 project_api_key         { `security find-generic-password -ga pivotal 2>&1`.match(/password: "(.*)"/)[1] }
 project_id              295755
 
+# Should finished stories be delivered when deploy is successful?
+deliver_finished        true
+
 # Who to notify about the release
 email_notification_to   'jebarker+releaseparty@gmail.com'
 
