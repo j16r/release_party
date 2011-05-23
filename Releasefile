@@ -2,10 +2,15 @@
 # This is a sample Releasefile used to test Release Party with rspec
 #
 
+
 # Pivotal details
-# To make sure the api key does not get stored in a repo we just load it from a
-# hidden file inside a block
-project_api_key         { File.read("#{ENV['HOME']}/.pivotal_api_key") }
+
+# Access the pivotal api key from a file in ~/
+#project_api_key         { File.read("#{ENV['HOME']}/.pivotal_api_key") }
+
+# Access the pivotal api key from the Mac OS X keychain, added like so:
+#security add-generic-password -a pivotal -D "Pivotal API Key" -s pivotal -w $API_KEY
+project_api_key         { `security find-generic-password -ga pivotal 2>&1`.match(/password: "(.*)"/)[1] }
 project_id              295755
 
 # Who to notify about the release
