@@ -1,4 +1,3 @@
-require 'rubygems'
 require 'bundler'
 
 begin
@@ -9,8 +8,6 @@ rescue Bundler::BundlerError => e
   exit e.status_code
 end
 
-require 'rake'
-require 'rspec/core'
 require 'rspec/core/rake_task'
 RSpec::Core::RakeTask.new(:spec) do |spec|
   spec.pattern = FileList['spec/**/*_spec.rb']
@@ -21,7 +18,7 @@ RSpec::Core::RakeTask.new(:rcov) do |spec|
   spec.rcov = true
 end
 
-task :default => :spec
-
 require 'yard'
 YARD::Rake::YardocTask.new
+
+task :default => :spec
