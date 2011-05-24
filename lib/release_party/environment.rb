@@ -50,6 +50,7 @@ class Environment
       :send_email => true,
       :template_engine => :haml,
       :deliver_stories => false,
+      :template => 'config/release_party/template.text.html.haml',
     }
   end
 
