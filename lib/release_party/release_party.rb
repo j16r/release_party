@@ -13,12 +13,12 @@ module Capistrano::ReleaseParty
   include Announce
 
   # Singleton instance of the release party environment
-  def self.instance(party = nil, &block)
+  def self.instance(party = nil, cap_config = nil, &block)
     return @env unless @env.nil?
 
-    raise ArgumentError, "Release finished without being started" if party.nil?
+    raise ArgumentError, "Release finished without being started" if party.nil? || cap_config.nil?
 
-    @env = Environment.new party
+    @env = Environment.new party, cap_config
     yield(@env) if block_given?
     @env
   end
@@ -32,7 +32,7 @@ module Capistrano::ReleaseParty
       namespace :release_party do
         task :starting do
 
-          env = Capistrano::ReleaseParty.instance(Capistrano::ReleaseParty) do |environment|
+          env = Capistrano::ReleaseParty.instance(Capistrano::ReleaseParty, configuration) do |environment|
             begin
               environment.load_release_file
             rescue ReleaseFile::FileNotFoundError => error

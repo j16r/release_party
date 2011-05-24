@@ -4,8 +4,9 @@ class Environment
 
   attr :party
 
-  def initialize(party)
+  def initialize(party, config)
     @party = party
+    @cap_config = config
     @variables = {}
   end
 
@@ -14,20 +15,21 @@ class Environment
     when /\A(.*)=\Z/
       @variables[$1.to_sym] = args.first || block
 
-    when /\A(.*)\?\Z/
-      @variables[$1.to_sym]
-
     else
       key = method_id.to_sym
-      value = @variables[key] || cap_config.fetch(key, defaults[key])
+      value = if @variables.key?(key)
+                @variables[key]
+              else
+                @cap_config.fetch(key, defaults[key])
+              end
       return value.call if value.is_a?(Proc)
       value
 
     end
   end
 
+  # Process the Releasefile and merge the variables loaded
   def load_release_file
-    # Process the Releasefile and merge the variables loaded
     release_file = ReleaseFile.new
     @variables = @variables.merge release_file.variables
   end
