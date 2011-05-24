@@ -34,7 +34,7 @@ module Capistrano::ReleaseParty
             end
           end
 
-          announce "beginning deployment, project details obtained."
+          announce "Beginning deployment, project details obtained."
 
           # Record when the release began
           @env.release_started = Time.now
@@ -61,7 +61,7 @@ module Capistrano::ReleaseParty
         task 'finished' do
           raise ArgumentError, "Release finished without being started" if @env.nil?
 
-          announce "performing post deploy celebrations"
+          announce "Performing post deploy celebrations!"
 
           # Record when the release finished
           @env.release_finished = Time.now
@@ -74,7 +74,6 @@ module Capistrano::ReleaseParty
       end
     end
   end
-
 end
 
 if Capistrano::Configuration.instance

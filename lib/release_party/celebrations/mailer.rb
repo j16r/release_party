@@ -48,7 +48,7 @@ module Celebrations
   private #######################################################################
 
     def deliver_notification
-      announce "delivering deployment notice to #{environment.email_notification_to.inspect}"
+      announce "Delivering deployment notice to #{environment.email_notification_to.inspect}"
       body = engine.render environment
       from = environment.from_address
       to = environment.email_notification_to
@@ -62,7 +62,7 @@ module Celebrations
           body body
         end
       end
-      announce "deployment notice sent!"
+      announce "Deployment notice sent!"
     end
 
   end
