@@ -36,7 +36,6 @@ class Environment
 
   def load_capistrano_defaults(cap_config)
     cap_config.variables.keys.each do |key|
-      puts "Cap config key: #{key}"
       self.send("#{key}=", cap_config.fetch(key, @variables[key.to_sym]))
     end
   end
