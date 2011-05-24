@@ -149,7 +149,7 @@
               %a{:href => story.url, :target => '_blank'}= story.id
               = '-'
               = story.name
-    - if release_notes?
+    - if release_notes
       %h2 Release notes
       #release_notes
         %p= release_notes

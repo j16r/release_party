@@ -37,7 +37,7 @@ protected #####################################################################
   # are supplied
   def arguments_required(*arguments)
     missing = arguments.reject do |argument|
-      environment.send("#{argument}?".to_sym)
+      environment.send(argument.to_sym)
     end
     unless missing.empty?
       raise ArgumentError, "Parameters #{missing.join(', ')} must be defined"
