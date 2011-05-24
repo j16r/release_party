@@ -12,38 +12,44 @@ end
 module Capistrano::ReleaseParty
   include Announce
 
+  # Singleton instance of the release party environment
+  def self.instance(party = nil, &block)
+    return @env unless @env.nil?
+
+    raise ArgumentError, "Release finished without being started" if party.nil?
+
+    @env = Environment.new party
+    yield(@env) if block_given?
+    @env
+  end
+
   def self.extended(configuration)
     configuration.load do
 
-      after 'defaults:check_variables', 'release_party:started'
-      after 'deploy', 'release_party:finished'
+      before 'deploy', 'release_party:starting'
+      after 'deploy',  'release_party:finished'
 
-      namespace 'release_party' do
-        task 'started' do
+      namespace :release_party do
+        task :starting do
 
-          if @env.nil?
-            # Load all the variables, first the defaults, then the values from
-            # the Capfile , then anything in the Releasefile
-            @env = Environment.new(Capistrano::ReleaseParty)
-            @env.load_defaults
-            @env.load_capistrano_defaults(configuration)
+          env = Capistrano::ReleaseParty.instance(Capistrano::ReleaseParty) do |environment|
             begin
-              @env.load_release_file
-            rescue ReleaseFile::FileNotFoundError => e
-              announce e.message
+              environment.load_release_file
+            rescue ReleaseFile::FileNotFoundError => error
+              announce error.message
             end
           end
 
           announce "Beginning deployment, project details obtained."
 
           # Record when the release began
-          @env.release_started = Time.now
+          env.release_started = Time.now
 
           # Load all the celebrations
-          @env.celebrations = \
+          env.celebrations = \
             Celebration.celebrations.collect do |celebration_class|
               begin
-                celebration_class.new(@env).tap(&:before_deploy)
+                celebration_class.new(env).tap(&:before_deploy)
 
               rescue LoadError => error
                 announce "Unable to load #{celebration_class}, message: #{error.message} you may have to install a gem"
@@ -58,16 +64,16 @@ module Capistrano::ReleaseParty
           
         end
 
-        task 'finished' do
-          raise ArgumentError, "Release finished without being started" if @env.nil?
+        task :finished do
+          env = Capistrano::ReleaseParty.instance
 
           announce "Performing post deploy celebrations!"
 
           # Record when the release finished
-          @env.release_finished = Time.now
+          env.release_finished = Time.now
 
           # Do after deploy
-          @env.celebrations.each(&:after_deploy)
+          env.celebrations.each(&:after_deploy)
 
           self
         end
