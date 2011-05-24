@@ -44,7 +44,7 @@ class Environment
       :from_address => 'Release Party <releaseparty@noreply.org>',
       :smtp_address => 'localhost',
       :smtp_port => 25,
-      :subject => Proc.new {"A release of #{display_name} was released to #{domain}"},
+      :subject => Proc.new {"#{display_name} was released to #{domain}"},
       :finished_stories => [],
       :known_bugs => [],
       :send_email => true,
