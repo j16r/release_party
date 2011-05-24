@@ -1,14 +1,101 @@
 # Release Party - Celebrate Successful Deployments
 
-Release party is a simple Capistrano plugin, which takes some configurable actions when you've successfully deployed your project. These might include:
+Release party is a simple Capistrano plugin, which takes some configurable
+actions when you've successfully deployed your project. These include:
 
 * Send out a deployment notice by email
 * Mark finished features as delivered in Pivotal Tracker
 * Announce delivery using campfile
+* Record deploy statistics using a deployment tracker
+
+## Install
+
+Add the release party gem to your project environment, e.g:
+
+    gem install release_party
+
+or for bundler:
+
+    gem 'release_party'
+
+Require Release Party in your Capfile, e.g:
+
+    require 'release_party'
+
+Tell Release Party how to celebrate by specifying options in the Releasefile in
+your project root.
+
+    # Get pivotal api key from the mac os x keyring and specify the pivotal project id
+    project_api_key         { `security find-generic-password -ga pivotal 2>&1`.match(/password: "(.*)"/)[1] }
+    project_id              295755
+
+    # Deliver finished pivotal stories
+    deliver_finished        true
+
+    # Send deployment email to...
+    email_notification_to   'jebarker+releaseparty@gmail.com'
+
+    # Use the specified haml template
+    template                'spec/assets/template.html.haml'
+
+Deploy!
 
 ## Configuring
 
-Create a 'Releasefile' in your project root to control what actions are taken when a deploy succeeds.
+Release Party loads a set of default configuration options, then loads all the
+values set in your Capfile, then loads any set in the Releasefile.
+
+Any values set in the Release Party environment are available inside the email
+template. e.g:
+
+    %h2 Known bugs
+    #known_bugs
+      - known_bugs.each do |story|
+        .story[story]
+          .bug
+            .title
+              %a{:href => story.url, :target => '_blank'}= story.id
+              = '-'
+              = story.name
+
+The code above will show the known bugs obtained from your pivotal tracker
+project.
+
+### Configuring Pivotal
+
+To use pivotal you must set the following configuration variables:
+
+* project\_api_key
+* project\_id
+
+If these are specified the following variables get loaded for use in other
+tasks:
+
+* finished\_stories A list of stories in the finished state
+* known\_bugs A list of bug stories that have not been delivered
+
+Optionally you can specify:
+
+* deliver\_finished If set to true, will set all finished stories to delivered
+  after deploy
+
+### Configuring Mail
+
+The mailer celebration takes a template (Haml or ERB) which has access to all
+the release party and capistrano configuration values, renders it then delivers
+it to the specified address. A sample Haml template is included in
+spec/assets/template.html.haml which demonstrates examples of listing features
+to approve and known bugs.
+
+It uses the following variables:
+
+* email\_notificaton\_to The email address or addresses (as an array of
+  strings) to deliver the deployment notifications to
+* from\_address The from address of the email (defaults to releaseparty@noreply.org)
+* smtp\_address The address of the SMTP server to use for mail delivery (defaults to localhost)
+* smtp\_port The port of the SMTP server to use for delivery (defaults to 25)
+* template\_engine The template engine to use, defaults to :haml but can also be set to :erb
+* subject The subject of the deployment email
 
 ## Contributing
 
