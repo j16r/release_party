@@ -1,11 +1,13 @@
 # Release Party - Celebrate Successful Deployments
 
+NOTE: This is completely ALPHA right now, I don't recommend you use it.
+
 Release party is a simple Capistrano plugin, which takes some configurable
 actions when you've successfully deployed your project. These include:
 
 * Send out a deployment notice by email
 * Mark finished features as delivered in Pivotal Tracker
-* Announce delivery using campfile
+* Announce delivery using campfire
 * Record deploy statistics using a deployment tracker
 
 ## Install
@@ -65,21 +67,23 @@ project.
 
 To use pivotal you must set the following configuration variables:
 
-* project\_api_key
-* project\_id
+    project_api_key  # The Pivotal API Key
+    project_id       # The ID of the Pivotal project you are deploying
 
 If these are specified the following variables get loaded for use in other
 tasks:
 
-* finished\_stories A list of stories in the finished state
-* known\_bugs A list of bug stories that have not been delivered
+    finished_stories # An array of (PivotalTracker::Story) features in the finished state
+    known_bugs       # An array of (PivotalTracker::Story) bugs that have not been delivered
 
 Optionally you can specify:
 
-* deliver\_finished If set to true, will set all finished stories to delivered
-  after deploy
+    deliver_finished true # Set to true to mark all finished stories as delivered on deploy
 
 ### Configuring Mail
+
+Mail integration requires the 'mail' gem and a template engine such as 'haml'
+or 'erb' (default is haml).
 
 The mailer celebration takes a template (Haml or ERB) which has access to all
 the release party and capistrano configuration values, renders it then delivers
@@ -89,13 +93,20 @@ to approve and known bugs.
 
 It uses the following variables:
 
-* email\_notificaton\_to The email address or addresses (as an array of
-  strings) to deliver the deployment notifications to
-* from\_address The from address of the email (defaults to releaseparty@noreply.org)
-* smtp\_address The address of the SMTP server to use for mail delivery (defaults to localhost)
-* smtp\_port The port of the SMTP server to use for delivery (defaults to 25)
-* template\_engine The template engine to use, defaults to :haml but can also be set to :erb
-* subject The subject of the deployment email
+    email_notificaton_to   # The email address or addresses (as an array of strings) to deliver the deployment notifications to
+    from_address           # The from address of the email (defaults to releaseparty@noreply.org)
+    smtp_address           # The address of the SMTP server to use for mail delivery (defaults to localhost)
+    smtp_port              # The port of the SMTP server to use for delivery (defaults to 25)
+    template_engine        # The template engine to use, defaults to :haml but can also be set to :erb
+    subject                # The subject of the deployment email
+
+### Configuring Campfire
+
+Campfire integration requires the 'tinder' gem.
+
+    campfire_account       # 
+    campfire_room          # 
+    campfire_token         # 
 
 ## Contributing
 
