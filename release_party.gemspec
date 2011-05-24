@@ -2,7 +2,7 @@ Gem::Specification.new do |spec|
   spec.name                       = 'release_party'
   spec.version                    = '0.0.2'
   spec.authors                    = ['John Barker']
-  spec.date                       = '2011-05-18'
+  spec.date                       = '2011-05-24'
   spec.homepage                   = 'https://github.com/excepttheweasel/release_party'
   spec.license                    = 'MIT'
   spec.required_rubygems_version  = Gem::Requirement.new("> 1.3.1") if spec.respond_to? :required_rubygems_version=
