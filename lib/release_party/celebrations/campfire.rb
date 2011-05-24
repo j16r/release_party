@@ -12,7 +12,7 @@ module Celebrations
 
       require 'tinder'
 
-      ssl = environment.campfire_ssl? && environment.campfire_ssl
+      ssl = environment.campfire_ssl
       @campfire = ::Tinder::Campfire.new \
         environment.campfire_account,
         :token => environment.campfire_token,

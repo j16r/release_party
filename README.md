@@ -7,7 +7,7 @@ actions when you've successfully deployed your project. These include:
 
 * Send out a deployment notice by email
 * Mark finished features as delivered in Pivotal Tracker
-* Announce delivery using campfire
+* Announce delivery using Campfire
 * Record deploy statistics using a deployment tracker
 
 ## Install
@@ -104,13 +104,19 @@ It uses the following variables:
 
 ### Configuring Campfire
 
-Campfire integration requires the 'tinder' gem.
+Campfire integration requires the 'tinder' gem. The following variables must be
+specified to use Campfire:
 
+    campfire_announce      # Set to true to make Campfire announcements
     campfire_account       # Campfire account user name
     campfire_room          # The room to announce in
-    campfire_token         # The API token to use when connecting to campfire
+    campfire_token         # The API token to use when connecting to Campfire
+
+These variables have sensible defaults, but can be changed:
+
     campfire_begin_message # The message to announce when deployment begins
     campfire_after_message # The message to announce when deployment finishes
+    campfire_ssl           # Whether to use SSL for connecting to Campfire or not
 
 ## Contributing
 
