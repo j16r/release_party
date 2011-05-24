@@ -20,7 +20,7 @@ deliver_finished        true
 email_notification_to   'jebarker+releaseparty@gmail.com'
 
 # Email template
-template                'spec/assets/template.html.haml'
+template                'spec/assets/template.text.html.haml'
 
 # Mailcatcher
 smtp_port               1025
