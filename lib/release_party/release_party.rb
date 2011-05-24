@@ -15,7 +15,7 @@ module Capistrano::ReleaseParty
   def self.extended(configuration)
     configuration.load do
 
-      before 'deploy', 'release_party:started'
+      after 'defaults:check_variables', 'release_party:started'
       after 'deploy', 'release_party:finished'
 
       namespace 'release_party' do
@@ -46,7 +46,7 @@ module Capistrano::ReleaseParty
                 celebration_class.new(@env).tap(&:before_deploy)
 
               rescue LoadError => error
-                announce "Unable to load #{celebration} you need the #{error} gem"
+                announce "Unable to load #{celebration_class}, message: #{error.message} you may have to install a gem"
 
               rescue ArgumentError => error
                 announce error.message
@@ -77,5 +77,5 @@ module Capistrano::ReleaseParty
 end
 
 if Capistrano::Configuration.instance
-  Capistrano::Configuration.instance.extend(Capistrano::Configuration.instance)
+  Capistrano::Configuration.instance.extend(Capistrano::ReleaseParty)
 end
