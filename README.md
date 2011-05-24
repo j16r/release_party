@@ -109,6 +109,8 @@ Campfire integration requires the 'tinder' gem.
     campfire_account       # Campfire account user name
     campfire_room          # The room to announce in
     campfire_token         # The API token to use when connecting to campfire
+    campfire_begin_message # The message to announce when deployment begins
+    campfire_after_message # The message to announce when deployment finishes
 
 ## Contributing
 
