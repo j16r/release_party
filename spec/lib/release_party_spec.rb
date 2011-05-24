@@ -20,6 +20,11 @@ describe Capistrano::ReleaseParty do
     @configuration.should callback('release_party:finished').after('deploy')
   end
 
+  it 'performs the task' do
+    @configuration.find_and_execute_task('release_party:starting')
+    @configuration.find_and_execute_task('release_party:finished')
+  end
+
   describe 'release_party:starting' do
 
     it 'creates an instance of all the celebrations' do
