@@ -119,36 +119,42 @@
       %a{:href => domain}= domain
       by #{user}.
     %h2 Stories delivered
-    %p
-      The following bugs and features have been completed and made available
-      for acceptance testing.
-    %p
-      You can accept or reject features by clicking on the story id and
-      pressing 'Accept' or 'Reject' respectively, or you can visit the project
-      page
-      %a{:href => "http://pivotaltracker.com/projects/#{project_id}/"} here
-      = '.'
+    - if finished_stories.empty?
+      %p No features were delivered in this release.
+    - else
+      %p
+        The following bugs and features have been completed and made available
+        for acceptance testing.
+      %p
+        You can accept or reject features by clicking on the story id and
+        pressing 'Accept' or 'Reject' respectively, or you can visit the project
+        page
+        %a{:href => "http://pivotaltracker.com/projects/#{project_id}/"} here
+        = '.'
 
-    #features
-      - finished_stories.each do |story|
-        .story[story]
-          .feature
-            .type
-              #{story.story_type.capitalize}
-            .title
-              %a{:href => story.url, :target => '_blank'}= story.id
-              = '-'
-              = story.name
-            .description= story.description
+      #features
+        - finished_stories.each do |story|
+          .story[story]
+            .feature
+              .type
+                #{story.story_type.capitalize}
+              .title
+                %a{:href => story.url, :target => '_blank'}= story.id
+                = '-'
+                = story.name
+              .description= story.description
     %h2 Known bugs
-    #known_bugs
-      - known_bugs.each do |story|
-        .story[story]
-          .bug
-            .title
-              %a{:href => story.url, :target => '_blank'}= story.id
-              = '-'
-              = story.name
+    - if known_bugs.empty?
+      %p There were no known bugs at the time of this release.
+    - else
+      #known_bugs
+        - known_bugs.each do |story|
+          .story[story]
+            .bug
+              .title
+                %a{:href => story.url, :target => '_blank'}= story.id
+                = '-'
+                = story.name
     - if release_notes
       %h2 Release notes
       #release_notes
