@@ -6,6 +6,8 @@ SMTP_SERVER_ERRORS = [TimeoutError,
                       Errno::EINVAL,
                       Errno::ECONNRESET,
                       Errno::ECONNREFUSED,
+                      Net::SMTPFatalError,
                       Net::SMTPUnknownError,
                       Net::SMTPServerBusy,
                       Net::SMTPAuthenticationError]
+
