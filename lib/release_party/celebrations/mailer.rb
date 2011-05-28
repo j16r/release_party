@@ -8,6 +8,37 @@ module Celebrations
   class Mailer < Celebration
     include Announce
 
+    class MailEnvironment
+      attr :attachments
+
+      def initialize(environment, mail)
+        @environment = environment
+        @mail = mail
+      end
+
+      def options_to_tag_attrs(options)
+        options.inject([]) do |memo, (key, value)|
+          memo << %{#{key}="#{value}"}
+        end.join(' ')
+      end
+
+      def image_file(filename)
+        path = File.join(File.dirname(@environment.template), filename)
+        @mail.attachments.inline[File.basename(path)] = File.read(path)
+        attachment = @mail.attachments.inline[File.basename(path)]
+        attachment.url
+      end
+
+      def image_tag(filename, options = {})
+
+        %{<img src="#{image_file(filename)}" #{options_to_tag_attrs options}/>}
+      end
+
+      def method_missing(method_id, *args, &block)
+        @environment.method_missing(method_id, *args, &block)
+      end
+    end
+
     attr :engine
 
     def initialize(env)
@@ -48,12 +79,23 @@ module Celebrations
 
   private #######################################################################
 
+    def parse_images(mail, html)
+      Nokogiri::HTML(html).xpath("//img") do |img|
+        src = img.attributes['src']
+        path = File.join(File.dirname(@environment.template), src)
+        mail.attachments.inline[File.basename(path)] = File.read(path)
+        attachment = mail.attachments.inline[File.basename(path)]
+        img.attributes['src'] = attachment.url
+      end
+    end
+
     def deliver_notification
       mail = Mail.new
       mail.to = environment.email_notification_to
       mail.from = environment.from_address
       mail.subject = environment.subject
-      html = engine.render environment 
+      mail_env = MailEnvironment.new(environment, mail)
+      html = engine.render mail_env
       mail.html_part do
         content_type 'text/html; charset=UTF-8'
         body html
