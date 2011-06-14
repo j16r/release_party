@@ -83,6 +83,7 @@ module Celebrations
       mail.to = environment.email_notification_to
       mail.from = environment.from_address
       mail.subject = environment.subject
+
       mail_env = MailEnvironment.new(environment, mail)
       html = engine.render mail_env
       mail.html_part = Mail::Part.new do
