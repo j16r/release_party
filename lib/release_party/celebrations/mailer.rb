@@ -30,7 +30,6 @@ module Celebrations
       end
 
       def image_tag(filename, options = {})
-
         %{<img src="#{image_file(filename)}" #{options_to_tag_attrs options}/>}
       end
 
@@ -79,16 +78,6 @@ module Celebrations
 
   private #######################################################################
 
-    def parse_images(mail, html)
-      Nokogiri::HTML(html).xpath("//img") do |img|
-        src = img.attributes['src']
-        path = File.join(File.dirname(@environment.template), src)
-        mail.attachments.inline[File.basename(path)] = File.read(path)
-        attachment = mail.attachments.inline[File.basename(path)]
-        img.attributes['src'] = attachment.url
-      end
-    end
-
     def deliver_notification
       mail = Mail.new
       mail.to = environment.email_notification_to
@@ -96,7 +85,7 @@ module Celebrations
       mail.subject = environment.subject
       mail_env = MailEnvironment.new(environment, mail)
       html = engine.render mail_env
-      mail.html_part do
+      mail.html_part = Mail::Part.new do
         content_type 'text/html; charset=UTF-8'
         body html
       end
