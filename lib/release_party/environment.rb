@@ -39,7 +39,7 @@ class Environment
       :user => `git config user.name`.chomp,
       :branch => 'master',
       :stage => 'staging',
-      :domain => 'http://releaseparty.org',
+      :domain => 'releaseparty.org',
       :display_name => 'Release Party',
       :from_address => 'Release Party <releaseparty@noreply.org>',
       :smtp_address => 'localhost',
