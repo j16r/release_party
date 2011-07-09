@@ -14,6 +14,7 @@ module Celebrations
       def initialize(environment, mail)
         @environment = environment
         @mail = mail
+        @attachments = []
       end
 
       def options_to_tag_attrs(options)
@@ -25,7 +26,7 @@ module Celebrations
       def image_file(filename)
         path = File.join(File.dirname(@environment.template), filename)
         @mail.attachments.inline[File.basename(path)] = File.read(path)
-        attachment = @mail.attachments.inline[File.basename(path)]
+        @attachments << attachment = @mail.attachments.inline[File.basename(path)]
         attachment.url
       end
 
@@ -78,6 +79,25 @@ module Celebrations
 
   private #######################################################################
 
+    def delete_image_part(parts, content_id)
+      return if parts.nil?
+
+      parts.each_with_index do |part, index|
+
+        if part.content_disposition =~ /inline/i &&
+          part.content_type =~ %r{^image/}i &&
+          part.content_id == content_id
+
+          return parts.delete_at(index)
+
+        else
+          delete_image_part(part.parts, content_id)
+
+        end
+
+      end
+    end
+
     def deliver_notification
       mail = Mail.new
       mail.to = environment.email_notification_to
@@ -86,9 +106,11 @@ module Celebrations
 
       mail_env = MailEnvironment.new(environment, mail)
       html = engine.render mail_env
-      mail.html_part = Mail::Part.new do
-        content_type 'text/html; charset=UTF-8'
-        body html
+      mail.part :content_type => 'multipart/related' do |part|
+        part.part :content_type => 'text/html; charset=UTF-8', :body => html
+        mail_env.attachments.each do |attachment|
+          part.parts << delete_image_part(mail.parts, attachment.content_id)
+        end
       end
 
       announce "Delivering deployment notice to #{environment.email_notification_to.inspect}"
